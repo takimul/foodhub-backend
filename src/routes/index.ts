@@ -5,6 +5,7 @@ import { authRouter } from "../modules/auth/auth.router";
 import { categoryRouter } from "../modules/category/category.router";
 import { mealRouter } from "../modules/meal/meal.router";
 import { orderRouter } from "../modules/order/order.router";
+import { reviewRouter } from "../modules/review/review.router";
 
 const router = Router();
 
@@ -14,5 +15,6 @@ router.use("/auth", authRouter);
 router.use("/categories", categoryRouter);
 router.use("/meals", mealRouter);
 router.use("/orders", orderRouter);
+router.use("/reviews", reviewRouter);
 
 export const apiRouter = router;
