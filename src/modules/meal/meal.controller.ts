@@ -18,7 +18,8 @@ export const getAllMeals = async (req: Request, res: Response) => {
 
   res.status(200).json({
     success: true,
-    data: result,
+    meta: result.meta,
+    data: result.data,
   });
 };
 

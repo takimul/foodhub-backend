@@ -1,3 +1,4 @@
+import { paginationHelper } from "../../helpers/paginationHelper";
 import { prisma } from "../../lib/prisma";
 
 const createMeal = async (userId: string, payload: any) => {
@@ -9,12 +10,36 @@ const createMeal = async (userId: string, payload: any) => {
   });
 };
 
-const getAllMeals = async (filters: any) => {
-  return prisma.meal.findMany({
-    where: {
-      isAvailable: true,
-      categoryId: filters.categoryId,
-    },
+const getAllMeals = async (query: any) => {
+  const { skip, limit } = paginationHelper(query);
+
+  const { minPrice, maxPrice, categoryId, search } = query;
+
+  const filters: any = {
+    isAvailable: true,
+  };
+
+  if (categoryId) {
+    filters.categoryId = categoryId;
+  }
+
+  if (minPrice || maxPrice) {
+    filters.price = {};
+    if (minPrice) filters.price.gte = Number(minPrice);
+    if (maxPrice) filters.price.lte = Number(maxPrice);
+  }
+
+  if (search) {
+    filters.title = {
+      contains: search,
+      mode: "insensitive",
+    };
+  }
+
+  const meals = await prisma.meal.findMany({
+    where: filters,
+    skip: skip,
+    take: limit,
     include: {
       category: true,
       provider: {
@@ -22,6 +47,17 @@ const getAllMeals = async (filters: any) => {
       },
     },
   });
+
+  const total = await prisma.meal.count({ where: filters });
+
+  return {
+    meta: {
+      page: Number(query.page) || 1,
+      limit,
+      total,
+    },
+    data: meals,
+  };
 };
 
 const getSingleMeal = async (id: string) => {
