@@ -17,6 +17,7 @@ const getAllMeals = async (query: any) => {
 
   const filters: any = {
     isAvailable: true,
+    isDeleted: false,
   };
 
   if (categoryId) {
@@ -90,10 +91,13 @@ const updateMeal = async (mealId: string, userId: string, payload: any) => {
 };
 
 const deleteMeal = async (mealId: string, userId: string) => {
-  return prisma.meal.deleteMany({
+  return prisma.meal.updateMany({
     where: {
       id: mealId,
       providerId: userId,
+    },
+    data: {
+      isDeleted: true,
     },
   });
 };

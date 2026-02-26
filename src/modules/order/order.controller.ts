@@ -1,7 +1,8 @@
 import type { Request, Response } from "express";
 import { orderService } from "./order.service";
+import { asyncHandler } from "../../utils/asyncHandler";
 
-export const createOrder = async (req: Request, res: Response) => {
+export const createOrder = asyncHandler(async (req: Request, res: Response) => {
   const user = (req as any).user;
 
   const result = await orderService.createOrder(user.id, req.body);
@@ -11,42 +12,73 @@ export const createOrder = async (req: Request, res: Response) => {
     message: "Order placed successfully",
     data: result,
   });
-};
+});
 
-export const getMyOrders = async (req: Request, res: Response) => {
+export const getAllOrders = asyncHandler(
+  async (req: Request, res: Response) => {
+    const result = await orderService.getAllOrders();
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  },
+);
+
+export const getMyOrders = asyncHandler(async (req: Request, res: Response) => {
   const user = (req as any).user;
 
   const result = await orderService.getMyOrders(user.id);
 
   res.json({ success: true, data: result });
-};
+});
 
-export const getSingleOrder = async (req: Request, res: Response) => {
-  const user = (req as any).user;
+export const getSingleOrder = asyncHandler(
+  async (req: Request, res: Response) => {
+    const user = (req as any).user;
 
-  const result = await orderService.getSingleOrder(
-    req.params.id as string,
-    user.id,
-  );
+    const result = await orderService.getSingleOrder(
+      req.params.id as string,
+      user.id,
+    );
 
-  res.json({ success: true, data: result });
-};
+    res.json({ success: true, data: result });
+  },
+);
 
-export const getProviderOrders = async (req: Request, res: Response) => {
-  const user = (req as any).user;
+export const getProviderOrders = asyncHandler(
+  async (req: Request, res: Response) => {
+    const user = (req as any).user;
 
-  const result = await orderService.getProviderOrders(user.id);
+    const result = await orderService.getProviderOrders(user.id);
 
-  res.json({ success: true, data: result });
-};
+    res.json({ success: true, data: result });
+  },
+);
 
-export const updateOrderStatus = async (req: Request, res: Response) => {
-  const { status } = req.body;
+export const updateOrderStatus = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { status } = req.body;
 
-  const result = await orderService.updateOrderStatus(
-    req.params.id as string,
-    status,
-  );
+    const result = await orderService.updateOrderStatus(
+      req.params.id as string,
+      status,
+    );
 
-  res.json({ success: true, data: result });
-};
+    res.json({ success: true, data: result });
+  },
+);
+
+//provider stats
+export const getProviderStats = asyncHandler(
+  async (req: Request, res: Response) => {
+    const user = (req as any).user;
+
+    const result = await orderService.getProviderStats(user.id);
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  },
+);

@@ -1,70 +1,79 @@
 import type { Request, Response } from "express";
 import { categoryService } from "./category.service";
+import { asyncHandler } from "../../utils/asyncHandler";
 
-export const createCategory = async (req: Request, res: Response) => {
-  const { name } = req.body;
+export const createCategory = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { name } = req.body;
 
-  if (!name) {
-    return res.status(400).json({
-      success: false,
-      message: "Category name is required",
+    if (!name) {
+      return res.status(400).json({
+        success: false,
+        message: "Category name is required",
+      });
+    }
+
+    const result = await categoryService.createCategory({ name });
+
+    res.status(201).json({
+      success: true,
+      message: "Category created successfully",
+      data: result,
     });
-  }
+  },
+);
 
-  const result = await categoryService.createCategory({ name });
+export const getAllCategories = asyncHandler(
+  async (req: Request, res: Response) => {
+    const result = await categoryService.getAllCategories();
 
-  res.status(201).json({
-    success: true,
-    message: "Category created successfully",
-    data: result,
-  });
-};
-
-export const getAllCategories = async (req: Request, res: Response) => {
-  const result = await categoryService.getAllCategories();
-
-  res.status(200).json({
-    success: true,
-    data: result,
-  });
-};
-
-export const updateCategory = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { name } = req.body;
-  const categoryId = Array.isArray(id) ? id[0] : id;
-
-  if (!categoryId) {
-    return res.status(400).json({
-      success: false,
-      message: "Category id is required",
+    res.status(200).json({
+      success: true,
+      data: result,
     });
-  }
+  },
+);
 
-  const result = await categoryService.updateCategory(categoryId, name);
+export const updateCategory = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { name } = req.body;
+    const categoryId = Array.isArray(id) ? id[0] : id;
 
-  res.status(200).json({
-    success: true,
-    message: "Category updated",
-    data: result,
-  });
-};
+    if (!categoryId) {
+      return res.status(400).json({
+        success: false,
+        message: "Category id is required",
+      });
+    }
 
-export const deleteCategory = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const categoryId = Array.isArray(id) ? id[0] : id;
+    const result = await categoryService.updateCategory(categoryId, name);
 
-  if (!categoryId) {
-    return res.status(400).json({
-      success: false,
-      message: "Category id is required",
+    res.status(200).json({
+      success: true,
+      message: "Category updated",
+      data: result,
     });
-  }
+  },
+);
 
-  await categoryService.deleteCategory(categoryId);
+export const deleteCategory = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const categoryId = Array.isArray(id) ? id[0] : id;
 
-  res.status(200).json({
-    success: true,
-    message: "Category deleted",
-  });
-};
+    if (!categoryId) {
+      return res.status(400).json({
+        success: false,
+        message: "Category id is required",
+      });
+    }
+
+    await categoryService.deleteCategory(categoryId);
+
+    res.status(200).json({
+      success: true,
+      message: "Category deleted",
+    });
+  },
+);

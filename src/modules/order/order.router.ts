@@ -5,17 +5,20 @@ import {
   getSingleOrder,
   getProviderOrders,
   updateOrderStatus,
+  getAllOrders,
+  getProviderStats,
 } from "./order.controller";
 import { requireAuth, requireRole } from "../../middlewares/auth";
 
 const router = Router();
 
-// Customer
+//admin
+router.get("/admin/all", requireAuth, requireRole("ADMIN"), getAllOrders);
+
 router.post("/", requireAuth, requireRole("CUSTOMER"), createOrder);
 router.get("/", requireAuth, requireRole("CUSTOMER"), getMyOrders);
 router.get("/:id", requireAuth, requireRole("CUSTOMER"), getSingleOrder);
 
-// Provider
 router.get(
   "/provider/orders",
   requireAuth,
@@ -28,6 +31,13 @@ router.patch(
   requireAuth,
   requireRole("PROVIDER"),
   updateOrderStatus,
+);
+
+router.get(
+  "/provider/stats",
+  requireAuth,
+  requireRole("PROVIDER"),
+  getProviderStats,
 );
 
 export const orderRouter = router;

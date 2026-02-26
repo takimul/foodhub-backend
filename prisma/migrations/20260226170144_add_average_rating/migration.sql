@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Meal" ADD COLUMN     "averageRating" DOUBLE PRECISION NOT NULL DEFAULT 0;

@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { auth } from "../lib/auth";
+import { AppError } from "../errors/AppError";
 
 export const requireAuth = async (
   req: Request,
@@ -30,14 +31,18 @@ export const requireAuth = async (
   }
 };
 
-export const requireRole = (...roles: string[]) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+export const requireRole =
+  (...roles: string[]) =>
+  (req: Request, res: Response, next: NextFunction) => {
     const user = (req as any).user;
 
+    if (!user) {
+      return next(new AppError(401, "Unauthorized"));
+    }
+
     if (!roles.includes(user.role)) {
-      return res.status(403).json({ message: "Forbidden" });
+      return next(new AppError(403, "Forbidden"));
     }
 
     next();
   };
-};
