@@ -7,15 +7,29 @@ import {
   getSingleMeal,
 } from "./meal.controller";
 import { requireAuth, requireRole } from "../../middlewares/auth";
+import { createMealSchema, updateMealSchema } from "./meal.validation";
+import { validateRequest } from "../../middlewares/validateRequest";
 
 const router = Router();
 
 router.get("/", getAllMeals);
 router.get("/:id", getSingleMeal);
 
-router.post("/", requireAuth, requireRole("PROVIDER"), createMeal);
+router.post(
+  "/",
+  requireAuth,
+  requireRole("PROVIDER"),
+  validateRequest(createMealSchema),
+  createMeal,
+);
 
-router.patch("/:id", requireAuth, requireRole("PROVIDER"), updateMeal);
+router.patch(
+  "/:id",
+  requireAuth,
+  requireRole("PROVIDER"),
+  validateRequest(updateMealSchema),
+  updateMeal,
+);
 
 router.delete("/:id", requireAuth, requireRole("PROVIDER"), deleteMeal);
 

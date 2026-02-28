@@ -1,17 +1,24 @@
 import { Router } from "express";
-import { userController } from "./user.controller";
+import {
+  getAllUsers,
+  updateUserStatus,
+  userController,
+} from "./user.controller";
 import { requireAuth, requireRole } from "../../middlewares/auth";
+import { updateUserStatusSchema } from "./user.validation";
+import { validateRequest } from "../../middlewares/validateRequest";
 
 const router = Router();
 
 // Admin routes
-router.get("/", requireAuth, requireRole("ADMIN"), userController.getAllUsers);
+router.get("/", requireAuth, requireRole("ADMIN"), getAllUsers);
 
 router.patch(
-  "/:id/status",
+  "/:id",
   requireAuth,
   requireRole("ADMIN"),
-  userController.updateUserStatus,
+  validateRequest(updateUserStatusSchema),
+  updateUserStatus,
 );
 
 // Authenticated user routes

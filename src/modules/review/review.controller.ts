@@ -8,20 +8,6 @@ export const createReview = asyncHandler(
 
     const { mealId, rating, comment } = req.body;
 
-    if (!mealId || !rating || !comment) {
-      return res.status(400).json({
-        success: false,
-        message: "Meal, rating and comment are required",
-      });
-    }
-
-    if (rating < 1 || rating > 5) {
-      return res.status(400).json({
-        success: false,
-        message: "Rating must be between 1 and 5",
-      });
-    }
-
     const result = await reviewService.createReview(user.id, {
       mealId,
       rating,

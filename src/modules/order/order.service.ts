@@ -1,43 +1,91 @@
+import { AppError } from "../../errors/AppError";
 import { prisma } from "../../lib/prisma";
 
+// const createOrder = async (userId: string, payload: any) => {
+//   const { items, address } = payload;
+
+//   let total = 0;
+
+//   const orderItemsData = await Promise.all(
+//     items.map(async (item: any) => {
+//       const meal = await prisma.meal.findUnique({
+//         where: { id: item.mealId },
+//       });
+
+//       if (!meal) throw new Error("Meal not found");
+
+//       total += meal.price * item.quantity;
+
+//       return {
+//         mealId: meal.id,
+//         quantity: item.quantity,
+//         price: meal.price,
+//       };
+//     }),
+//   );
+
+//   return prisma.order.create({
+//     data: {
+//       userId,
+//       address,
+//       total,
+//       items: {
+//         create: orderItemsData,
+//       },
+//     },
+//     include: {
+//       items: true,
+//     },
+//   });
+// };
+
 const createOrder = async (userId: string, payload: any) => {
-  const { items, address } = payload;
+  const { address } = payload;
 
-  let total = 0;
+  // 1️⃣ Get cart items
+  const cartItems = await prisma.cartItem.findMany({
+    where: { userId },
+    include: { meal: true },
+  });
 
-  const orderItemsData = await Promise.all(
-    items.map(async (item: any) => {
-      const meal = await prisma.meal.findUnique({
-        where: { id: item.mealId },
-      });
+  if (!cartItems.length) {
+    throw new AppError(400, "Cart is empty");
+  }
 
-      if (!meal) throw new Error("Meal not found");
-
-      total += meal.price * item.quantity;
-
-      return {
-        mealId: meal.id,
-        quantity: item.quantity,
-        price: meal.price,
-      };
-    }),
+  // 2️⃣ Calculate total safely from DB
+  const total = cartItems.reduce(
+    (sum, item) => sum + item.quantity * item.meal.price,
+    0,
   );
 
-  return prisma.order.create({
+  // 3️⃣ Create order + order items
+  const order = await prisma.order.create({
     data: {
       userId,
       address,
       total,
       items: {
-        create: orderItemsData,
+        create: cartItems.map((item) => ({
+          mealId: item.mealId,
+          quantity: item.quantity,
+          price: item.meal.price,
+        })),
       },
     },
     include: {
-      items: true,
+      items: {
+        include: { meal: true },
+      },
     },
   });
-};
 
+  // 4️⃣ Clear cart after order
+  await prisma.cartItem.deleteMany({
+    where: { userId },
+  });
+
+  return order;
+};
 const getAllOrders = async () => {
   return prisma.order.findMany({
     include: {

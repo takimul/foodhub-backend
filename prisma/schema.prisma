@@ -53,6 +53,7 @@ model User {
   orders          Order[]
   reviews         Review[]
   meals           Meal[] 
+  cartItems CartItem[]
 }
 
 
@@ -140,6 +141,7 @@ model Meal {
   updatedAt   DateTime @updatedAt
   orderItems OrderItem[]
   reviews Review[]
+  cartItems CartItem[]
   averageRating Float @default(0)
   isDeleted Boolean @default(false)
 }
@@ -186,4 +188,19 @@ model Review {
   meal      Meal     @relation(fields: [mealId], references: [id])
 
   createdAt DateTime @default(now())
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  userId    String
+  mealId    String
+  quantity  Int      @default(1)
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  meal      Meal     @relation(fields: [mealId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, mealId])
 }

@@ -9,13 +9,21 @@ import {
   getProviderStats,
 } from "./order.controller";
 import { requireAuth, requireRole } from "../../middlewares/auth";
+import { createOrderSchema } from "./order.validation";
+import { validateRequest } from "../../middlewares/validateRequest";
 
 const router = Router();
 
 //admin
 router.get("/admin/all", requireAuth, requireRole("ADMIN"), getAllOrders);
 
-router.post("/", requireAuth, requireRole("CUSTOMER"), createOrder);
+router.post(
+  "/",
+  requireAuth,
+  requireRole("CUSTOMER"),
+  validateRequest(createOrderSchema),
+  createOrder,
+);
 router.get("/", requireAuth, requireRole("CUSTOMER"), getMyOrders);
 router.get("/:id", requireAuth, requireRole("CUSTOMER"), getSingleOrder);
 

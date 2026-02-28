@@ -7,19 +7,10 @@ export const registerUser = asyncHandler(
   async (req: Request, res: Response) => {
     const { name, email, password, role } = req.body;
 
-    if (!name || !email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "Name, email and password are required",
-      });
-    }
-
-    // 1️⃣ Create user using better-auth
     const result = await auth.api.signUpEmail({
       body: { name, email, password, role },
     });
 
-    // 2️⃣ If provider, create provider profile
     if (role === "PROVIDER") {
       const user = await prisma.user.findUnique({
         where: { email },
@@ -37,7 +28,7 @@ export const registerUser = asyncHandler(
       }
     }
 
-    return res.status(201).json({
+    res.status(201).json({
       success: true,
       message: "User registered successfully",
       data: result,
