@@ -6,6 +6,39 @@ const getMyProviderProfile = async (userId: string) => {
   });
 };
 
+const getPublicProvider = async (providerId: string) => {
+  const profile = await prisma.providerProfile.findUnique({
+    where: { userId: providerId },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          image: true,
+        },
+      },
+    },
+  });
+
+  if (!profile) return null;
+
+  const meals = await prisma.meal.findMany({
+    where: {
+      providerId,
+      isAvailable: true,
+      isDeleted: false,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return {
+    profile,
+    meals,
+  };
+};
+
 const updateProviderProfile = async (userId: string, payload: any) => {
   return prisma.providerProfile.update({
     where: { userId },
@@ -16,4 +49,5 @@ const updateProviderProfile = async (userId: string, payload: any) => {
 export const providerService = {
   getMyProviderProfile,
   updateProviderProfile,
+  getPublicProvider,
 };
