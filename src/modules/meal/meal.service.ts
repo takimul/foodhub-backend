@@ -1,3 +1,4 @@
+import { AppError } from "../../errors/AppError";
 import { paginationHelper } from "../../helpers/paginationHelper";
 import { prisma } from "../../lib/prisma";
 
@@ -80,12 +81,32 @@ const getSingleMeal = async (id: string) => {
   });
 };
 
+const getProviderMeals = async (providerId: string) => {
+  return prisma.meal.findMany({
+    where: {
+      providerId,
+      isDeleted: false,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};
+
 const updateMeal = async (mealId: string, userId: string, payload: any) => {
-  return prisma.meal.updateMany({
+  const meal = await prisma.meal.findFirst({
     where: {
       id: mealId,
       providerId: userId,
     },
+  });
+
+  if (!meal) {
+    throw new AppError(404, "Meal not found");
+  }
+
+  return prisma.meal.update({
+    where: { id: mealId },
     data: payload,
   });
 };
@@ -106,6 +127,7 @@ export const mealService = {
   createMeal,
   getAllMeals,
   getSingleMeal,
+  getProviderMeals,
   updateMeal,
   deleteMeal,
 };

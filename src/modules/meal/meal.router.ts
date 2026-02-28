@@ -5,6 +5,7 @@ import {
   updateMeal,
   deleteMeal,
   getSingleMeal,
+  getProviderMeals,
 } from "./meal.controller";
 import { requireAuth, requireRole } from "../../middlewares/auth";
 import { createMealSchema, updateMealSchema } from "./meal.validation";
@@ -29,6 +30,12 @@ router.patch(
   requireRole("PROVIDER"),
   validateRequest(updateMealSchema),
   updateMeal,
+);
+router.get(
+  "/provider/meals",
+  requireAuth,
+  requireRole("PROVIDER"),
+  getProviderMeals,
 );
 
 router.delete("/:id", requireAuth, requireRole("PROVIDER"), deleteMeal);

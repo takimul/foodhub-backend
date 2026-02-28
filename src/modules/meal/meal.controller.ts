@@ -44,12 +44,23 @@ export const getSingleMeal = asyncHandler(
   },
 );
 
+export const getProviderMeals = asyncHandler(
+  async (req: Request, res: Response) => {
+    const user = (req as any).user as { id: string };
+
+    const result = await mealService.getProviderMeals(user.id);
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  },
+);
+
 export const updateMeal = asyncHandler(
   async (req: Request<{ id: string }>, res: Response) => {
-    // declare that params.id is a string and also tell TS that the
-    // authenticated user object has a string `id` property
     const user = (req as any).user as { id: string };
-    const { id } = req.params; // typed as string
+    const { id } = req.params;
 
     const result = await mealService.updateMeal(id, user.id, req.body);
 
